@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcela Content Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar / Header -->
+        <header>
+            <div class="logo">✨ Marcela Content Studio</div>
+            <div class="status-badge {{ 'online' if profile else 'offline' }}">
+                {% if profile %}
+                Connected as @{{ profile.username }}
+                {% else %}
+                Disconnected
+                {% endif %}
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alerts">
+            {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <main>
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="card stat">
+                    <h3>Queue</h3>
+                    <div class="number">{{ queue_count }}</div>
+                    <div class="label">Images Ready</div>
+                </div>
+                <div class="card stat">
+                    <h3>Daily Limit</h3>
+                    <div class="number">{{ config.get('daily_post_limit', 5) }}</div>
+                    <div class="label">Pins / Run</div>
+                </div>
+                <div class="card stat">
+                    <h3>Target Board</h3>
+                    <div class="number text-small">{{ config.get('board_id', 'Not Set') }}</div>
+                </div>
+            </div>
+
+            <div class="actions-grid">
+                <!-- Manual Run -->
+                <div class="card action-card">
+                    <h2>🚀 Operations</h2>
+                    <p>Run the daily automation manually.</p>
+                    <form action="{{ url_for('run_automation') }}" method="POST">
+                        <button type="submit" class="btn-primary" {% if queue_count==0 %}disabled{% endif %}>
+                            Run Daily Post Now
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Connect -->
+                <div class="card action-card">
+                    <h2>🔗 Connection</h2>
+                    <p>Connect your Pinterest account to enable posting.</p>
+                    {% if auth_url %}
+                    <a href="{{ auth_url }}" class="btn-secondary">Connect Pinterest</a>
+                    {% else %}
+                    <button class="btn-success" disabled>✓ Connected</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="card settings-card">
+                <h2>⚙️ Configuration</h2>
+                <form action="{{ url_for('settings') }}" method="POST">
+                    <div class="form-group">
+                        <label>App ID</label>
+                        <input type="text" name="app_id" value="{{ config.get('app_id', '') }}"
+                            placeholder="Enter Pinterest App ID">
+                    </div>
+                    <div class="form-group">
+                        <label>App Secret</label>
+                        <input type="password" name="app_secret" value="{{ config.get('app_secret', '') }}"
+                            placeholder="Enter Pinterest App Secret">
+                    </div>
+                    <div class="form-group">
+                        <label>Board ID</label>
+                        <input type="text" name="board_id" value="{{ config.get('board_id', '') }}"
+                            placeholder="Board ID to post to">
+                    </div>
+                    <div class="form-group">
+                        <label>Website URL (Bait)</label>
+                        <input type="text" name="website_url" value="{{ config.get('website_url', '') }}"
+                            placeholder="https://your-site.netlify.app">
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Limit</label>
+                        <input type="number" name="daily_post_limit" value="{{ config.get('daily_post_limit', 5) }}">
+                    </div>
+                    <button type="submit" class="btn-save">Save Settings</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
