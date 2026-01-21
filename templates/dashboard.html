@@ -53,6 +53,16 @@
             </div>
 
             <div class="actions-grid">
+                <!-- Upload -->
+                <div class="card action-card">
+                    <h2>📤 Upload Content</h2>
+                    <p>Add new images to the queue.</p>
+                    <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="file" multiple accept=".jpg,.jpeg,.png" style="margin-bottom: 1rem;">
+                        <button type="submit" class="btn-secondary">Upload Images</button>
+                    </form>
+                </div>
+
                 <!-- Manual Run -->
                 <div class="card action-card">
                     <h2>🚀 Operations</h2>
@@ -106,6 +116,10 @@
                     </div>
                     <button type="submit" class="btn-save">Save Settings</button>
                 </form>
+                </form>
+            </div>
+            <div style="text-align: center; color: #666; font-size: 0.8rem; margin-top: 2rem;">
+                v1.1 (SEO Enabled)
             </div>
         </main>
     </div>
