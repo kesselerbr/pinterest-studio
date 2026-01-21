@@ -47,6 +47,34 @@ def run_automation():
         flash(f"Error: {result['message']}", 'error')
     return redirect(url_for('home'))
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        flash('No file part', 'error')
+        return redirect(url_for('home'))
+        
+    files = request.files.getlist('file')
+    
+    saved_count = 0
+    input_folder = manager.config.get('input_folder', 'inputs')
+    if not os.path.exists(input_folder):
+        os.makedirs(input_folder)
+
+    for file in files:
+        if file.filename == '':
+            continue
+        if file and (file.filename.lower().endswith(('.png', '.jpg', '.jpeg'))):
+            filename = file.filename
+            file.save(os.path.join(input_folder, filename))
+            saved_count += 1
+            
+    if saved_count > 0:
+        flash(f'{saved_count} images uploaded successfully!', 'success')
+    else:
+        flash('No valid images uploaded.', 'error')
+        
+    return redirect(url_for('home'))
+
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
