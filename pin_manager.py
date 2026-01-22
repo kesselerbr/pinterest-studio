@@ -13,10 +13,26 @@ class PinManager:
         self.config = self.load_config()
 
     def load_config(self):
+        defaults = {
+            "app_id": "1543663",
+            "app_secret": "3243f6a490942584cd1d8015f490d4509a359936",
+            "board_id": "336784947074357903",
+            "redirect_uri": "https://marcela-studio.onrender.com/callback",
+            "website_url": "https://rad-mochi-11c837.netlify.app",
+            "daily_post_limit": "5"
+        }
+        
         if not os.path.exists(CONFIG_PATH):
-            return {}
-        with open(CONFIG_PATH, 'r') as f:
-            return json.load(f)
+            return defaults
+            
+        try:
+            with open(CONFIG_PATH, 'r') as f:
+                saved_config = json.load(f)
+                # Merge saved config onto defaults (saved takes precedence for tokens, etc.)
+                defaults.update(saved_config)
+                return defaults
+        except:
+            return defaults
 
     def save_config(self, new_config):
         self.config.update(new_config)
@@ -111,10 +127,24 @@ class PinManager:
         input_folder = self.config.get('input_folder', 'inputs')
         img_path = os.path.join(input_folder, img_name)
         
-        # Determine Title/Desc
+        # Default Metadata
         clean_name = os.path.splitext(img_name)[0].replace("-", " ").replace("_", " ")
         title = f"{self.config.get('default_title_prefix', '')}{clean_name.title()}"
         description = f"{title}. Get your daily numerology reading at {link}. #numerology #affirmations"
+        
+        # Check for JSON Sidecar (SEO)
+        json_name = os.path.splitext(img_name)[0] + '.json'
+        json_path = os.path.join(input_folder, json_name)
+        
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    meta = json.load(f)
+                    if meta.get('title'): title = meta.get('title')
+                    if meta.get('description'): description = meta.get('description')
+                    if meta.get('link'): link = meta.get('link') # Override link if specific
+            except Exception as e:
+                print(f"Error reading JSON for {img_name}: {e}")
 
         url = "https://api.pinterest.com/v5/pins"
         headers = {
